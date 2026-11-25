@@ -197,7 +197,7 @@ function reveal() {
       prepareQuestion();
     } else {
       composer.hidden = true;
-      $('hint').innerHTML = '<a href="/">Back to start</a>';
+      $('hint').innerHTML = '<a href="./">Back to start</a>';
     }
   }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 2000);
 }

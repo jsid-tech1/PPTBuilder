@@ -16,7 +16,7 @@ http.createServer(async (request, response) => {
     return;
   }
   try {
-    const bytes = await readFile(join(__dirname, 'public', route[0]));
+    const bytes = await readFile(join(__dirname, route[0]));
     response.writeHead(200, { 'Content-Type': route[1], 'Cache-Control': 'no-cache' }).end(bytes);
   } catch {
     response.writeHead(500).end('Unable to open the requested file.');
