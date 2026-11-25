@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Forma · Project conversation</title>
-<link rel="stylesheet" href="./style.css"><script defer src="./layouts.js"></script><script defer src="./app.js"></script>
+<link rel="stylesheet" href="./style.css"><script defer src="./vendor/html2canvas.min.js"></script><script defer src="./layouts.js"></script><script defer src="./app.js"></script>
 </head>
 <body>
 <header><a href="./" class="brand"><i class="mark" aria-hidden="true"></i> Forma</a><span>Project presentation</span><a id="export" class="export" href="./presentation.pptx" download="Design System Builder.pptx">Export PPTX</a></header>
 <main>
 <section id="landing">
-<h1>Design System Builder</h1><p class="tag">From idea to design system.</p>
+<p class="module">Tech 1</p><h1>Design System Builder</h1><p class="tag">From idea to design system.</p>
 <form id="start"><input id="command" aria-label="Start command" placeholder="Type Start to open the chat…" autocomplete="off"><button aria-label="Open chat">↵</button></form>
-<button class="chip" id="suggest">Start presentation <kbd>↵</kbd></button><p id="notice" role="status"></p>
+<button class="chip" id="suggest">Start presentation <kbd>↵</kbd></button><p id="notice" role="status"></p><footer class="credits"><strong>Participants</strong><p>Aditya · Vansh · Shivangi · Upasna</p><small>Lab 3 · DPD · Semester 5</small></footer>
 </section>
 <section id="chat" hidden>
 <div id="story" aria-label="Conversation"></div>
@@ -29,7 +29,7 @@
     <label>Font<select id="font"><option>Arial</option><option>Georgia</option><option>Verdana</option><option>Courier New</option></select></label>
     <label>Text size<input type="range" id="scale" min="80" max="125" step="5"></label>
     <label>Slide padding<input type="range" id="padding" min="32" max="88" step="4"></label>
-    <fieldset><legend>Suggested layouts</legend><div id="layouts"></div></fieldset>
+    <label>Corner radius<input type="range" id="radius" min="0" max="40" step="2"></label><fieldset><legend>Suggested layouts</legend><div id="layouts"></div></fieldset>
     <small id="save-state" role="status"></small>
   </div>
 </aside></body></html>

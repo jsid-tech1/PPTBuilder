@@ -54,7 +54,7 @@ function slideScene(s,index) {
   const items = contentItems(s.content);
   const accentInk = parseInt(s.accent.slice(1,3),16)*.299 + parseInt(s.accent.slice(3,5),16)*.587 + parseInt(s.accent.slice(5),16)*.114 > 148 ? '#151515' : '#ffffff';
   text(s.section,p,p,w-130,34,20,true);
-  text(String(index+1).padStart(2,'0')+' / 13',1280-p-100,p,100,30,18);
+  text(String(index).padStart(2,'0')+' / 12',1280-p-100,p,100,30,18);
   rect(p,p+44,w,2,s.ink);
   const top = p+68;
   if (s.layout==='Poster') {
@@ -118,7 +118,7 @@ function slideScene(s,index) {
 function slideSvg(slide,index) {
   const parts=slideScene(slide,index).map(part=>{
     const {type,x,y,width,height,fill}=part;
-    if(type==='rect') return '<rect x="'+x+'" y="'+y+'" width="'+width+'" height="'+height+'" fill="'+fill+'"/>';
+    if(type==='rect') return '<rect rx="'+Math.min(slide.radius,width/2,height/2)+'" x="'+x+'" y="'+y+'" width="'+width+'" height="'+height+'" fill="'+fill+'"/>';
     if(type==='ellipse') return '<ellipse cx="'+(x+width/2)+'" cy="'+(y+height/2)+'" rx="'+width/2+'" ry="'+height/2+'" fill="'+fill+'"/>';
     return '<g fill="'+part.color+'" font-family="'+part.font+'" font-size="'+part.size+'" font-weight="'+(part.bold?700:400)+'">'+part.lines.map((line,j)=>'<text x="'+x+'" y="'+(y+part.size*(.9+j*1.19))+'">'+escapeText(line)+'</text>').join('')+'</g>';
   });

@@ -127,26 +127,43 @@ const slides = [
   }
 ];
 const $ = id => document.getElementById(id);
-const layouts = ['Poster', 'Split', 'Grid', 'Stripes', 'Steps'];
-const defaults = ['Poster','Split','Stripes','Steps','Grid','Split','Grid','Steps','Grid','Stripes','Grid','Stripes','Poster'];
-const themes = [
-  ['#ece9ff','#201a30','#ab90ff'], ['#20372f','#ffffff','#a6ecc3'],
-  ['#fff2ce','#341d12','#ff965f'], ['#191a21','#ffffff','#ded3ff'],
-  ['#e1efff','#172c45','#83c2ff']
-];
+const layouts = ['Original', 'Poster', 'Split', 'Grid', 'Stripes', 'Steps'];
+const themes = [['#e5ff9d','#12180c','#ffe78b'],['#dfd5ff','#1c152a','#fcf1bd'],['#18191b','#ffffff','#fff489'],['#fff691','#19190a','#f3bef0'],['#eff0ed','#1f2021','#ffbb81']];
 const fonts = ['Arial','Georgia','Verdana','Courier New'];
 const storageKey = 'forma-slide-edits-v1';
 let edits = {};
 try { edits = JSON.parse(localStorage.getItem(storageKey)) || {}; } catch {}
 const deck = slides.map((slide,i) => {
   const [bg,ink,accent] = themes[i % themes.length];
-  return {...slide,content:slide.blocks.join('\n\n'),layout:defaults[i],bg,ink,accent,font:'Arial',scale:100,padding:56,...edits[i]};
+  return {...slide,content:slide.blocks.join('\n\n'),layout:'Original',bg,ink,accent,font:'Arial',scale:100,padding:56,radius:12,...edits[i]};
 });
 function card(_,i) {
   const s = deck[i];
-  return '<article class="canvas-slide" data-page="'+i+'" tabindex="0" role="button" aria-label="Edit slide '+(i+1)+': '+escapeText(s.title)+'">'+slideSvg(s,i)+'</article>';
+  if (s.layout === 'Original') return originalCard(s,i);
+  return '<article class="canvas-slide" data-page="'+i+'" tabindex="0" role="button" aria-label="Edit slide '+i+': '+escapeText(s.title)+'">'+slideSvg(s,i)+'</article>';
 }
 const esc = escapeText;
+const clean = text => text.replace(/\*\*/g,'');
+function originalCard(s,i) {
+ const [bg,fg,tile]=[s.bg,s.ink,s.accent];
+ const cover = i === 1 || i === 12;
+ const overrides = edits[i] || {};
+ const custom = [overrides.font && 'font-family:'+s.font, overrides.padding && 'padding:'+s.padding/12.8+'%', overrides.radius!==undefined && 'border-radius:'+s.radius+'px', '--text-scale:'+s.scale/100].filter(Boolean).join(';');
+ const tiles=[];
+ const body=[];
+ for(const block of s.content.split(/\n\s*\n/)){
+   const lines=block.split('\n');
+   if(lines[0].startsWith('**') && lines.length>1){
+     tiles.push('<div class="tile"><strong>'+esc(clean(lines[0]))+'</strong><p>'+esc(lines.slice(1).join(' '))+'</p></div>');
+   }else if(/^(- |1\. )/.test(block)){
+     const tag=block.startsWith('-')?'ul':'ol';
+     body.push('<'+tag+'>'+lines.map(line=>'<li>'+esc(line.replace(/^(- |\d+\. )/,''))+'</li>').join('')+'</'+tag+'>');
+   }else body.push('<p>'+esc(clean(block))+'</p>');
+ }
+ if(tiles.length) body.push('<div class="tiles">'+tiles.join('')+'</div>');
+ return '<article tabindex="0" role="button" aria-label="Edit slide '+i+'" data-page="'+i+'" class="editable slide '+(cover?'cover':'')+'" style="--bg:'+bg+';--fg:'+fg+';--tile:'+tile+';'+custom+'"><div class="folio"><span>'+esc(s.section)+'</span><span>'+String(i).padStart(2,'0')+' / 12</span></div><h2>'+esc(s.title)+'</h2><div class="copy">'+body.join('')+'</div>'+(cover?'<div class="shapes" aria-hidden="true"><i></i><i></i><i></i></div>':'')+'</article>';
+}
+
 const story = $('story');
 const composer = $('composer');
 const message = $('message');
@@ -220,7 +237,7 @@ $('start').onsubmit = event => {
   }
   $('landing').hidden = true;
   $('chat').hidden = false;
-  story.innerHTML = '<p class="user">Start</p><div class="speaker"><b>✳</b> Forma</div>' + card(slides[0],0) + '<p class="hero-tip">Click a slide to edit it. Type <strong>Project</strong> to continue.</p>';
+  story.innerHTML = '<p class="user">Start</p><div class="speaker"><b>✳</b> Forma</div><p class="hero-tip">Type <strong>Project</strong> to open the first slide. Click any slide to edit it.</p>';
   message.focus();
 };
 $('suggest').onclick = () => {
@@ -230,7 +247,7 @@ $('suggest').onclick = () => {
 
 let activeSlide = null;
 const panel = $('inspector');
-const fields = ['section','title','content','bg','ink','accent','font','scale','padding'];
+const fields = ['section','title','content','bg','ink','accent','font','scale','padding','radius'];
 
 function updateLayoutButtons() {
   for (const button of $('layouts').children)
@@ -239,9 +256,9 @@ function updateLayoutButtons() {
 
 function editSlide(index) {
   activeSlide=index;
-  document.querySelector('.canvas-slide.selected')?.classList.remove('selected');
+  document.querySelector('article.selected')?.classList.remove('selected');
   story.querySelector('[data-page="'+index+'"]').classList.add('selected');
-  $('selection').textContent='Slide '+(index+1)+' of '+deck.length;
+  $('selection').textContent='Slide '+index+' of '+(deck.length-1);
   fields.forEach(key=>{ $(key).value=deck[index][key]; });
   updateLayoutButtons();
   panel.hidden=false;
@@ -265,8 +282,9 @@ function changeProperty(key,value) {
   deck[activeSlide][key]=value;
   edits[activeSlide]={...edits[activeSlide],[key]:value};
   const article=story.querySelector('[data-page="'+activeSlide+'"]');
-  article.innerHTML=slideSvg(deck[activeSlide],activeSlide);
-  article.setAttribute('aria-label','Edit slide '+(activeSlide+1)+': '+deck[activeSlide].title);
+  article.outerHTML=card(deck[activeSlide],activeSlide);
+  story.querySelector('[data-page="'+activeSlide+'"]').classList.add('selected');
+  article.setAttribute('aria-label','Edit slide '+activeSlide+': '+deck[activeSlide].title);
   try {
     localStorage.setItem(storageKey,JSON.stringify(edits));
     $('save-state').textContent='Saved on this device';
@@ -284,11 +302,11 @@ fields.forEach(key=>{
   $(key).addEventListener('input',event=>changeProperty(key,event.target.type==='range' ? event.target.valueAsNumber : event.target.value));
 });
 story.addEventListener('click',event=>{
-  const article=event.target.closest('.canvas-slide');
+  const article=event.target.closest('article[data-page]');
   if (article) editSlide(Number(article.dataset.page));
 });
 story.addEventListener('keydown',event=>{
-  if (event.target.matches('.canvas-slide') && ['Enter',' '].includes(event.key)) {
+  if (event.target.matches('article[data-page]') && ['Enter',' '].includes(event.key)) {
     event.preventDefault();
     editSlide(Number(event.target.dataset.page));
   }
@@ -312,11 +330,21 @@ async function makePresentation() {
   await loadExportLibrary();
   const ppt=new PptxGenJS();
   ppt.layout='LAYOUT_WIDE';
-  ppt.title=deck[0].title;
-  deck.forEach((model,index)=>{
+  ppt.title='AI Power Design System';
+  for (const [index,model] of deck.entries()) {
+    if (index===0) continue;
     const slide=ppt.addSlide();
     slide.background={color:model.bg.slice(1)};
-    for (const part of slideScene(model,index)) {
+    if (model.layout==='Original') {
+      const frame=document.createElement('div');
+      frame.style.cssText='position:fixed;left:-2000px;top:0;width:1280px';
+      frame.innerHTML=originalCard(model,index);
+      document.body.append(frame);
+      try {
+        const canvas=await html2canvas(frame.firstElementChild,{scale:1,windowWidth:1440,logging:false});
+        slide.addImage({data:canvas.toDataURL(),x:0,y:0,w:13.33333,h:7.5});
+      } finally {frame.remove();}
+    } else for (const part of slideScene(model,index)) {
       const bounds={x:part.x/96,y:part.y/96,w:part.width/96,h:part.height/96};
       if (part.type==='text') {
         part.lines.forEach((line,j)=>{
@@ -326,15 +354,16 @@ async function makePresentation() {
             wrap:false,margin:0,valign:'mid',paraSpaceAfter:0,paraSpaceBefore:0});
         });
       } else {
-        slide.addShape(ppt.ShapeType[part.type],{...bounds,line:{transparency:100},fill:{color:part.fill.slice(1)}});
+        slide.addShape(ppt.ShapeType[part.type === "rect" && model.radius > 0 ? "roundRect" : part.type],{...bounds,rectRadius:Math.min(model.radius,part.width/2,part.height/2)/96,line:{transparency:100},fill:{color:part.fill.slice(1)}});
       }
     }
     slide.addNotes(model.content);
-  });
+  }
   return ppt;
 }
 
 $('export').onclick=async event=>{
+  if (!Object.keys(edits).length) return;
   event.preventDefault();
   const link=$('export');
   if (link.getAttribute('aria-busy')==='true') return;
@@ -342,7 +371,7 @@ $('export').onclick=async event=>{
   link.textContent='Exporting…';
   try {
     const ppt=await makePresentation();
-    await ppt.writeFile({fileName:(deck[0].title.trim()||'Design System')+'.pptx'});
+    await ppt.writeFile({fileName:'AI Power Design System'+'.pptx'});
     link.textContent='Export PPTX';
   } catch {
     link.textContent='Retry export';

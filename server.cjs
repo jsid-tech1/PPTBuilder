@@ -5,6 +5,7 @@ const { join } = require('node:path');
 const routes = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/vendor/pptxgen.bundle.js', ['vendor/pptxgen.bundle.js', 'text/javascript; charset=utf-8']],
+  ['/vendor/html2canvas.min.js', ['vendor/html2canvas.min.js', 'text/javascript; charset=utf-8']],
   ['/layouts.js', ['layouts.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/style.css', ['style.css', 'text/css; charset=utf-8']],
