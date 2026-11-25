@@ -1,15 +1,15 @@
 const slides = [
   {
-    "section": "HERO SECTION",
-    "title": "AI-Powered Design System Builder",
+    "section": "3 TPD · Semester 5",
+    "title": "AI Power Design System",
     "question": "What are we presenting today?",
     "blocks": [
-      "Build your design system, based on your idea."
+      "**Participants**\nPunch · Adite · Shivangi · Upasna · Lev"
     ]
   },
   {
     "section": "PROJECT OVERVIEW",
-    "title": "What is the project?",
+    "title": "Project Overview",
     "question": "What is the project?",
     "blocks": [
       "Turn a project idea and a colour palette into a design system in seconds.",
@@ -127,26 +127,26 @@ const slides = [
   }
 ];
 const $ = id => document.getElementById(id);
-const clean = text => text.replace(/\*\*/g,'');
-const palettes = [['#e5ff9d','#12180c','#ffe78b'],['#dfd5ff','#1c152a','#fcf1bd'],['#18191b','#fff','#fff489'],['#fff691','#19190a','#f3bef0'],['#eff0ed','#1f2021','#ffbb81']];
-const esc = text => text.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-function card(s,i){
- const [bg,fg,tile]=palettes[i%palettes.length];
- const cover=[0,1,12].includes(i);
- const tiles=[];
- const body=[];
- for(const block of s.blocks){
-   const lines=block.split('\n');
-   if(lines[0].startsWith('**') && lines.length>1){
-     tiles.push('<div class="tile"><strong>'+esc(clean(lines[0]))+'</strong><p>'+esc(lines.slice(1).join(' '))+'</p></div>');
-   }else if(/^(- |1\. )/.test(block)){
-     const tag=block.startsWith('-')?'ul':'ol';
-     body.push('<'+tag+'>'+lines.map(line=>'<li>'+esc(line.replace(/^(- |\d+\. )/,''))+'</li>').join('')+'</'+tag+'>');
-   }else body.push('<p>'+esc(clean(block))+'</p>');
- }
- if(tiles.length) body.push('<div class="tiles">'+tiles.join('')+'</div>');
- return '<article data-page="'+i+'" class="slide '+(cover?'cover':'')+'" style="--bg:'+bg+';--fg:'+fg+';--tile:'+tile+'"><div class="folio"><span>'+esc(s.section)+'</span><span>'+String(i).padStart(2,'0')+' / 12</span></div><h2>'+esc(i === 1 ? 'Project Overview' : s.title)+'</h2><div class="copy">'+body.join('')+'</div>'+(cover?'<div class="shapes" aria-hidden="true"><i></i><i></i><i></i></div>':'')+'</article>';
+const layouts = ['Poster', 'Split', 'Grid', 'Stripes', 'Steps'];
+const defaults = ['Poster','Split','Stripes','Steps','Grid','Split','Grid','Steps','Grid','Stripes','Grid','Stripes','Poster'];
+const themes = [
+  ['#ece9ff','#201a30','#ab90ff'], ['#20372f','#ffffff','#a6ecc3'],
+  ['#fff2ce','#341d12','#ff965f'], ['#191a21','#ffffff','#ded3ff'],
+  ['#e1efff','#172c45','#83c2ff']
+];
+const fonts = ['Arial','Georgia','Verdana','Courier New'];
+const storageKey = 'forma-slide-edits-v1';
+let edits = {};
+try { edits = JSON.parse(localStorage.getItem(storageKey)) || {}; } catch {}
+const deck = slides.map((slide,i) => {
+  const [bg,ink,accent] = themes[i % themes.length];
+  return {...slide,content:slide.blocks.join('\n\n'),layout:defaults[i],bg,ink,accent,font:'Arial',scale:100,padding:56,...edits[i]};
+});
+function card(_,i) {
+  const s = deck[i];
+  return '<article class="canvas-slide" data-page="'+i+'" tabindex="0" role="button" aria-label="Edit slide '+(i+1)+': '+escapeText(s.title)+'">'+slideSvg(s,i)+'</article>';
 }
+const esc = escapeText;
 const story = $('story');
 const composer = $('composer');
 const message = $('message');
@@ -167,7 +167,7 @@ function prepareQuestion() {
       if (count >= question.length) clearInterval(typing);
     }, 24);
   }
-  message.focus({preventScroll:true});
+  if (activeSlide === null) message.focus({preventScroll:true});
 }
 
 function reveal() {
@@ -220,10 +220,131 @@ $('start').onsubmit = event => {
   }
   $('landing').hidden = true;
   $('chat').hidden = false;
-  story.innerHTML = '<p class="user">Start</p><div class="speaker"><b>✳</b> Forma</div><p>Type <strong>Project</strong> to see the project overview.</p>';
+  story.innerHTML = '<p class="user">Start</p><div class="speaker"><b>✳</b> Forma</div>' + card(slides[0],0) + '<p class="hero-tip">Click a slide to edit it. Type <strong>Project</strong> to continue.</p>';
   message.focus();
 };
 $('suggest').onclick = () => {
   $('command').value = 'Start';
   $('start').requestSubmit();
+};
+
+let activeSlide = null;
+const panel = $('inspector');
+const fields = ['section','title','content','bg','ink','accent','font','scale','padding'];
+
+function updateLayoutButtons() {
+  for (const button of $('layouts').children)
+    button.setAttribute('aria-pressed',button.dataset.layout === deck[activeSlide].layout);
+}
+
+function editSlide(index) {
+  activeSlide=index;
+  document.querySelector('.canvas-slide.selected')?.classList.remove('selected');
+  story.querySelector('[data-page="'+index+'"]').classList.add('selected');
+  $('selection').textContent='Slide '+(index+1)+' of '+deck.length;
+  fields.forEach(key=>{ $(key).value=deck[index][key]; });
+  updateLayoutButtons();
+  panel.hidden=false;
+  document.body.classList.add('editing');
+  $('save-state').textContent='Changes save on this device.';
+  $('close-panel').focus({preventScroll:true});
+}
+
+function closePanel() {
+  const article=story.querySelector('[data-page="'+activeSlide+'"]');
+  article?.classList.remove('selected');
+  panel.hidden=true;
+  activeSlide=null;
+  document.body.classList.remove('editing');
+  if (composer.hidden) article?.focus({preventScroll:true});
+  else message.focus({preventScroll:true});
+}
+
+function changeProperty(key,value) {
+  if (activeSlide === null) return;
+  deck[activeSlide][key]=value;
+  edits[activeSlide]={...edits[activeSlide],[key]:value};
+  const article=story.querySelector('[data-page="'+activeSlide+'"]');
+  article.innerHTML=slideSvg(deck[activeSlide],activeSlide);
+  article.setAttribute('aria-label','Edit slide '+(activeSlide+1)+': '+deck[activeSlide].title);
+  try {
+    localStorage.setItem(storageKey,JSON.stringify(edits));
+    $('save-state').textContent='Saved on this device';
+  } catch { $('save-state').textContent='Changes are in memory. Export to keep them.'; }
+}
+
+for (const layout of layouts) {
+  const button=document.createElement('button');
+  button.dataset.layout=layout;
+  button.innerHTML='<span class="layout-icon" aria-hidden="true"><i></i><i></i><i></i></span>'+layout;
+  button.onclick=()=>{ changeProperty('layout',layout); updateLayoutButtons(); };
+  $('layouts').append(button);
+}
+fields.forEach(key=>{
+  $(key).addEventListener('input',event=>changeProperty(key,event.target.type==='range' ? event.target.valueAsNumber : event.target.value));
+});
+story.addEventListener('click',event=>{
+  const article=event.target.closest('.canvas-slide');
+  if (article) editSlide(Number(article.dataset.page));
+});
+story.addEventListener('keydown',event=>{
+  if (event.target.matches('.canvas-slide') && ['Enter',' '].includes(event.key)) {
+    event.preventDefault();
+    editSlide(Number(event.target.dataset.page));
+  }
+});
+$('close-panel').onclick=closePanel;
+document.addEventListener('keydown',event=>{ if (event.key==='Escape' && activeSlide!==null) closePanel(); });
+
+let exportLibrary;
+function loadExportLibrary() {
+  if (!exportLibrary) exportLibrary=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src='./vendor/pptxgen.bundle.js';
+    script.onload=resolve;
+    script.onerror=()=>{exportLibrary=null;script.remove();reject(new Error('Unable to load PowerPoint export'));};
+    document.head.append(script);
+  });
+  return exportLibrary;
+}
+
+async function makePresentation() {
+  await loadExportLibrary();
+  const ppt=new PptxGenJS();
+  ppt.layout='LAYOUT_WIDE';
+  ppt.title=deck[0].title;
+  deck.forEach((model,index)=>{
+    const slide=ppt.addSlide();
+    slide.background={color:model.bg.slice(1)};
+    for (const part of slideScene(model,index)) {
+      const bounds={x:part.x/96,y:part.y/96,w:part.width/96,h:part.height/96};
+      if (part.type==='text') {
+        part.lines.forEach((line,j)=>{
+          if (!line) return;
+          slide.addText(line,{...bounds,y:(part.y+j*part.size*1.19)/96,h:part.size*1.19/96,
+            fontFace:part.font,fontSize:part.size*.75,color:part.color.slice(1),bold:part.bold,
+            wrap:false,margin:0,valign:'mid',paraSpaceAfter:0,paraSpaceBefore:0});
+        });
+      } else {
+        slide.addShape(ppt.ShapeType[part.type],{...bounds,line:{transparency:100},fill:{color:part.fill.slice(1)}});
+      }
+    }
+    slide.addNotes(model.content);
+  });
+  return ppt;
+}
+
+$('export').onclick=async event=>{
+  event.preventDefault();
+  const link=$('export');
+  if (link.getAttribute('aria-busy')==='true') return;
+  link.setAttribute('aria-busy','true');
+  link.textContent='Exporting…';
+  try {
+    const ppt=await makePresentation();
+    await ppt.writeFile({fileName:(deck[0].title.trim()||'Design System')+'.pptx'});
+    link.textContent='Export PPTX';
+  } catch {
+    link.textContent='Retry export';
+  } finally { link.removeAttribute('aria-busy'); }
 };
