@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Forma · Project conversation</title>
+<link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script>
+</head>
+<body>
+<header><a href="/" class="brand"><i class="mark" aria-hidden="true"></i> Forma</a><span>Project presentation</span><a class="export" href="/presentation.pptx" download="Design System Builder.pptx">Export PPTX</a></header>
+<main>
+<section id="landing">
+<h1>Design System Builder</h1><p class="tag">From idea to design system.</p>
+<form id="start"><input id="command" aria-label="Start command" placeholder="Type Start to open the chat…" autocomplete="off"><button aria-label="Open chat">↵</button></form>
+<button class="chip" id="suggest">Start presentation <kbd>↵</kbd></button><p id="notice" role="status"></p>
+</section>
+<section id="chat" hidden>
+<div id="story" aria-label="Conversation"></div>
+<div class="dock"><form class="prompt" id="composer"><input id="message" aria-label="Presentation message" autocomplete="off" placeholder="Type Project…"><button aria-label="Send message">↑</button></form><div id="hint" role="status"></div></div>
+</section>
+</main></body></html>
