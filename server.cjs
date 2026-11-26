@@ -15,7 +15,7 @@ const routes = new Map([
   ['/presentation.pptx', ['presentation.pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']]
 ]);
 
-for (let i=1; i<=20; i++) {
+for (let i=1; i<=9; i++) {
   const path='slides/page-'+String(i).padStart(2,'0')+'.png';
   routes.set('/'+path,[path,'image/png']);
 }

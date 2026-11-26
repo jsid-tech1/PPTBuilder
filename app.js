@@ -3,10 +3,6 @@ const questions = [
  'What is the project?', 'What problem are we solving?', 'How does the builder work?',
  'What are its key features?', 'What does it generate?', 'Which technologies power it?',
  'Can we see the product?', 'What challenges did we face?', 'How did we solve them?',
- 'What is the project outline?', 'How is the project introduced?', 'What problem are we solving?',
- 'What makes the tool useful?', 'What else is in the feature overview?', 'What does the tool generate?',
- 'How does it work behind the scenes?', 'How does an idea become a design system?',
- 'Can we walk through the screens?', 'What were the major issues?', 'How did we find the right approach?'
 ];
 const story = $('story');
 const composer = $('composer');
@@ -44,7 +40,7 @@ function reveal() {
   const turn = document.createElement('section');
   turn.className = 'turn';
   turn.innerHTML = '<p class="user">' + (i === 0 ? 'Project' : questions[i]) +
-    '</p><div class="speaker"><b>✳</b> Forma <span class="pending" role="status">Preparing slide <i></i><i></i><i></i></span></div>';
+    '</p><div class="speaker"><b>✳</b> dsgen/slide <span class="pending" role="status">Preparing slide <i></i><i></i><i></i></span></div>';
   story.append(turn);
   turn.scrollIntoView({block:'start'});
   setTimeout(() => {
@@ -81,7 +77,7 @@ $('start').onsubmit = event => {
   }
   $('landing').hidden = true;
   $('chat').hidden = false;
-  story.innerHTML = '<p class="user">Start</p><div class="speaker"><b>✳</b> Forma</div><p class="hero-tip">Type <strong>Project</strong> to open the first slide.</p>';
+  story.innerHTML = '<p class="user">Start</p><div class="speaker"><b>✳</b> dsgen/slide</div><p class="hero-tip">Type <strong>Project</strong> to open the first slide.</p>';
   message.focus();
 };
 $('suggest').onclick = () => {
