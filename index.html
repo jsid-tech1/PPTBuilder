@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Forma · Project conversation</title>
-<link rel="stylesheet" href="./style.css"><script defer src="./vendor/html2canvas.min.js"></script><script defer src="./layouts.js"></script><script defer src="./app.js"></script>
+<link rel="stylesheet" href="./style.css"><script defer src="./text-map.js"></script><script defer src="./text-edit.js"></script><script defer src="./app.js"></script>
 </head>
 <body>
 <header><a href="./" class="brand"><i class="mark" aria-hidden="true"></i> Forma</a><span>Project presentation</span><a id="export" class="export" href="./presentation.pptx" download="Design System Builder.pptx">Export PPTX</a></header>
@@ -18,18 +18,4 @@
 <div class="dock"><form class="prompt" id="composer"><input id="message" aria-label="Presentation message" autocomplete="off" placeholder="Type Project…"><button aria-label="Send message">↑</button></form><div id="hint" role="status"></div></div>
 </section>
 </main>
-<aside id="inspector" hidden aria-labelledby="inspector-title">
-  <div class="inspector-head"><div><small id="selection"></small><h2 id="inspector-title">Slide properties</h2></div><button id="close-panel" aria-label="Close slide properties">×</button></div>
-  <div class="controls">
-    <label>Section<input id="section" maxlength="100"></label>
-    <label>Title<input id="title" maxlength="180"></label>
-    <label>Content<textarea id="content" rows="6" aria-describedby="content-help"></textarea></label>
-    <small id="content-help">Separate items with a blank line. Use **bold** for item headings.</small>
-    <fieldset><legend>Colours</legend><div class="colour-row"><label>Canvas<input type="color" id="bg"></label><label>Text<input type="color" id="ink"></label><label>Accent<input type="color" id="accent"></label></div></fieldset>
-    <label>Font<select id="font"><option>Arial</option><option>Georgia</option><option>Verdana</option><option>Courier New</option></select></label>
-    <label>Text size<input type="range" id="scale" min="80" max="125" step="5"></label>
-    <label>Slide padding<input type="range" id="padding" min="32" max="88" step="4"></label>
-    <label>Corner radius<input type="range" id="radius" min="0" max="40" step="2"></label><fieldset><legend>Suggested layouts</legend><div id="layouts"></div></fieldset>
-    <small id="save-state" role="status"></small>
-  </div>
-</aside></body></html>
+<dialog id="edit-text"><form method="dialog"><label>Edit slide text<input id="replacement" autocomplete="off"></label><div><button value="cancel">Cancel</button><button value="save">Save text</button></div></form></dialog></body></html>

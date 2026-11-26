@@ -7,11 +7,18 @@ const routes = new Map([
   ['/vendor/pptxgen.bundle.js', ['vendor/pptxgen.bundle.js', 'text/javascript; charset=utf-8']],
   ['/vendor/html2canvas.min.js', ['vendor/html2canvas.min.js', 'text/javascript; charset=utf-8']],
   ['/layouts.js', ['layouts.js', 'text/javascript; charset=utf-8']],
+  ['/text-edit.js',['text-edit.js','text/javascript']],
+  ['/text-map.js',['text-map.js','text/javascript']],
+  ['/fonts/DM-Sans.ttf',['fonts/DM-Sans.ttf','font/ttf']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/style.css', ['style.css', 'text/css; charset=utf-8']],
   ['/presentation.pptx', ['presentation.pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']]
 ]);
 
+for (let i=1; i<=20; i++) {
+  const path='slides/page-'+String(i).padStart(2,'0')+'.png';
+  routes.set('/'+path,[path,'image/png']);
+}
 http.createServer(async (request, response) => {
   const route = routes.get(request.url.split('?')[0]);
   if (!route || request.method !== 'GET') {
